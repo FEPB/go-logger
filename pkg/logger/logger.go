@@ -54,59 +54,28 @@ func encoderConfig() zapcore.EncoderConfig {
 }
 
 // Info logs a message at InfoLevel. The message includes any fields passed at the log site, as well as any fields accumulated on the logger.
-func Info(msg string, fields ...interface{}) {
-	log.Info(msg, convertToZapFields(fields...)...)
+func Info(msg string, fields ...zap.Field) {
+	log.Info(msg, fields...)
 }
 
 // Error logs a message at ErrorLevel. The message includes any fields passed at the log site, as well as any fields accumulated on the logger.
-func Error(msg string, fields ...interface{}) {
-	log.Error(msg, convertToZapFields(fields...)...)
+func Error(msg string, fields ...zap.Field) {
+	log.Error(msg, fields...)
 }
 
 // Debug logs a message at DebugLevel. The message includes any fields passed at the log site, as well as any fields accumulated on the logger.
-func Debug(msg string, fields ...interface{}) {
-	log.Debug(msg, convertToZapFields(fields...)...)
+func Debug(msg string, fields ...zap.Field) {
+	log.Debug(msg, fields...)
 }
 
 // Fatal logs a message at FatalLevel then calls os.Exit(1). The message includes any fields passed at the log site, as well as any fields accumulated on the logger.
-func Fatal(msg string, fields ...interface{}) {
-	log.Fatal(msg, convertToZapFields(fields...)...)
-}
-
-// convertToZapFields converts a dynamic list of interface{} into zap.Fields based on their type
-func convertToZapFields(fields ...interface{}) []zap.Field {
-	zapFields := make([]zap.Field, 0, len(fields)/2)
-
-	// Expecting pairs of key-value like: key, value, key, value
-	for i := 0; i < len(fields)-1; i += 2 {
-		key, ok := fields[i].(string)
-		if !ok {
-			// Skip if the key is not a string
-			continue
-		}
-		value := fields[i+1]
-
-		// Handle different types for value
-		switch v := value.(type) {
-		case string:
-			zapFields = append(zapFields, zap.String(key, v))
-		case int:
-			zapFields = append(zapFields, zap.Int(key, v))
-		case bool:
-			zapFields = append(zapFields, zap.Bool(key, v))
-		case float64:
-			zapFields = append(zapFields, zap.Float64(key, v))
-		default:
-			// Fallback for other types using reflection
-			zapFields = append(zapFields, zap.Reflect(key, v))
-		}
-	}
-	return zapFields
+func Fatal(msg string, fields ...zap.Field) {
+	log.Fatal(msg, fields...)
 }
 
 // WithFields returns a new logger with the provided fields.
-func WithFields(fields ...interface{}) *zap.Logger {
-	return log.With(convertToZapFields(fields...)...)
+func WithFields(fields ...zap.Field) *zap.Logger {
+	return log.With(fields...)
 }
 
 // SetLogLevel allows changing the log level dynamically.
